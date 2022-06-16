@@ -1,6 +1,7 @@
 package intoto
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -19,7 +20,8 @@ func ToProto(in *intoto.ProvenanceStatement) (*pb.InTotoStatement, error) {
 	}
 
 	subject := convertSubject(in.Subject)
-	predicate, err := convertPredicate(in)
+	// predicate, err := convertPredicate(in)
+	predicate, err := convertPredicate2(in)
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +33,22 @@ func ToProto(in *intoto.ProvenanceStatement) (*pb.InTotoStatement, error) {
 		Predicate:     predicate,
 	}, nil
 
+}
+
+func convertPredicate2(in *intoto.ProvenanceStatement) (*pb.InTotoStatement_SlsaProvenanceZeroTwo, error) {
+	raw, err := json.Marshal(in.Predicate)
+	if err != nil {
+		return nil, err
+	}
+
+	result := pb.SlsaProvenanceZeroTwo{}
+	if err := json.Unmarshal(raw, &result); err != nil {
+		return nil, err
+	}
+
+	return &pb.InTotoStatement_SlsaProvenanceZeroTwo{
+		SlsaProvenanceZeroTwo: &result,
+	}, nil
 }
 
 func convertPredicate(in *intoto.ProvenanceStatement) (*pb.InTotoStatement_SlsaProvenanceZeroTwo, error) {
